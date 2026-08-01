@@ -24,7 +24,7 @@ from claude_agent_sdk import ClaudeSDKClient, ClaudeAgentOptions, query
 from datetime import date
 
 # System prompt with citation requirements for research quality
-RESEARCH_SYSTEM_PROMPT = """You are a research agent specialized in AI.
+AGENT_SYSTEM_PROMPT = """You are a research agent specialized in AI.
 
 When providing research findings:
 - Always include source URLs as citations
@@ -65,7 +65,6 @@ async def send_query(
     model: str,
     activity_handler: Callable[[Any], None | Any] = print_activity,
     continue_conversation: bool = False,
-    display_result: bool = True,
 ) -> tuple[str | None, list[Any]]:
     """
     Send a query to the research agent with web search and multimodal support.
@@ -75,8 +74,6 @@ async def send_query(
         activity_handler: Callback for activity updates (default: print_activity)
         continue_conversation: Continue the previous conversation if True
         model: Model to use (default: claude-sonnet-4-6)
-        display_result: If True, display the response using display_agent_response()
-            after completion. Set to False for programmatic use.
 
     Note:
         For the activity_handler - we support both sync and async handlers
@@ -86,9 +83,7 @@ async def send_query(
         In production, you'd typically use just one type based on your needs
 
     Returns:
-        A tuple of (result_text, messages), where result_text is the final
-        result text or None if no result was produced, and messages is the
-        list of all messages received (possibly empty).
+        Tuple of (result, messages) - result is the final text, messages is the full conversation
     """
     # Only reset activity context for new conversations, not continuations
     if not continue_conversation:
@@ -99,7 +94,7 @@ async def send_query(
         cwd="src/research_agent",
         allowed_tools=["WebSearch", "Read"],
         continue_conversation=continue_conversation,
-        system_prompt=RESEARCH_SYSTEM_PROMPT,
+        system_prompt=AGENT_SYSTEM_PROMPT,
         max_buffer_size=10 * 1024 * 1024,  # 10MB buffer for handling images and large responses
     )
 
@@ -121,9 +116,5 @@ async def send_query(
     except Exception as e:
         print(f"❌ Query error: {e}")
         raise
-
-    if messages and display_result:
-        # Display the result using the shared visualization utility
-        print_markdown_result(messages)
 
     return result, messages
