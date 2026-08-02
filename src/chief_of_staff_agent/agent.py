@@ -36,6 +36,7 @@ from claude_agent_sdk import ClaudeAgentOptions, ClaudeSDKClient
 
 AGENT_SYSTEM_PROMPT = """You are the Chief of Staff for TechStart Inc, a 50-person startup.
 
+Delegate financial questions to the financial-analyst subagent. Do not try to answer these questions yourself.
 Apart from your tools and two subagents, you also have custom Python scripts in the scripts/ directory you can run with Bash:
 - python scripts/financial_forecast.py: Advanced financial modeling
 - python scripts/talent_scorer.py: Candidate scoring algorithm
@@ -112,6 +113,7 @@ async def send_query(
             "Edit",
             "Bash",
             "WebSearch",
+            "MultiEdit",
         ],
         continue_conversation=continue_conversation,
         system_prompt=AGENT_SYSTEM_PROMPT,
